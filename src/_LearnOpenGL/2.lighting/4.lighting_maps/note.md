@@ -1,0 +1,2 @@
+- 直接跳过先 diffuse(== ambient) 再 specular 的步骤，直接看 ambient + diffuse + specular 的光照模型
+- 总的来说，就是相比上一节把整个物体的 diffuse 和 specular 系数改为从纹理中获取

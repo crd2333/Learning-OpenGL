@@ -1,0 +1,10 @@
+.vscode/
+include/
+lib/
+other/
+output/
+resources/
+
+*.o
+*.d
+imgui.ini
