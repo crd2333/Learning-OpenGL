@@ -1,5 +1,4 @@
-#ifndef __GAME_FRAME_H__
-#define __GAME_FRAME_H__
+#pragma once
 
 #include <iostream>
 
@@ -172,19 +171,7 @@ namespace GameFrame {
         glfwPollEvents();
         return;
     }
-    // 主渲染循环
-    // void MainRenderLoop(GLFWwindow* window) {
-    //     while (!glfwWindowShouldClose(window)) {
-    //         RenderLoopPreProcess(window);
 
-    //         // ImGui demo window (for testing purposes)
-    //         // ImGui::Begin("Demo Window");
-    //         // ImGui::Text("Hello, world!");
-    //         // ImGui::End();
-
-    //         RenderLoopPostProcess(window);
-    //     }
-    // }
 }
 
 // util functions
@@ -225,5 +212,3 @@ void ChangeFocus(GLFWwindow* window, bool flag) {
     lastX = SCR_WIDTH / 2.0f;
     lastY = SCR_HEIGHT / 2.0f;
 }
-
-#endif

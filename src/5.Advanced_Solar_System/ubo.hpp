@@ -1,17 +1,20 @@
-#pragma once
+//
+// Created by mf on 2024/12/5.
+//
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <vector>
+#pragma once
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+
+#include <string>
 #include "shader.h"
 
-// note: the size and offset calculation is left to the user
+// Uniform Buffer Object 用于共享多个着色器之间的 uniform 变量，只需一次更新，所有着色器的变量都会一起更新，避免冗余代码
+// note: the calculation pf size and offset is left to the user
 class UBO {
 public:
+    // constructor of UBO, define size of the buffer, binding point and block name
     UBO(GLsizeiptr size, GLuint bindingPoint, const std::string& blockName) : bindingPoint(bindingPoint), blockName(blockName) {
         glGenBuffers(1, &uboID);
         glBindBuffer(GL_UNIFORM_BUFFER, uboID);
@@ -27,6 +30,7 @@ public:
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
+    // decide which shader the UBO is bound to
     void Bind(const Shader& shader) const {
         GLuint uniformBlockIndex = glGetUniformBlockIndex(shader.ID, blockName.c_str());
         glUniformBlockBinding(shader.ID, uniformBlockIndex, bindingPoint);

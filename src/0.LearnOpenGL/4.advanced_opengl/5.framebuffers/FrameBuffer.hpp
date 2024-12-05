@@ -1,0 +1,118 @@
+//
+// Created by mf on 2024/12/5.
+//
+
+#pragma once
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
+#include "MyTexture.hpp"
+
+// 帧缓冲对象的抽象封装
+// 一个帧缓冲对象包含三个子部分：color buffer、depth buffer 和 stencil buffer
+//     其中 color buffer 是必须的否则不完整，但可以显式声明不使用任何颜色数据进行渲染
+//     后二者可以结合成 depth-stencil buffer 以节省显存
+// 每种 buffer 可以是一个 texture attachment 或 renderbuffer object(RBO)
+//     理论上来说都做成 texture 也是可以的，但 RBO 作为非通用数据缓冲专门被引入 OpenGL，其性能更好
+//     但是 RBO 不能被采样，它是只写的，适用于需要深度和模板值用于测试的场合，如果需要采样就只能用 texture
+// 一个完整的 FBO 必须：附加至少一个 buffer，至少有一个 color attachment，所有的 attachment 都是完整的（分配了内存），每个 buffer 都应该有相同的样本数
+
+// 这里我预定义几种常见的 FBO 类型进行封装
+enum FBO_TYPE {
+    FBO_COLOR_TEXT_ONLY, // 只有使用纹理作为附件的颜色缓冲，如 learnOpenGL 抗锯齿小节中的 intermediateFBO
+    FBO_DEPTH_TEXT_ONLY, // 只有使用纹理作为附件的深度缓冲，如 learnOpenGL 阴影映射小节中的 depthMapFBO
+    FBO_CO_TEXT_DEPSTEN_RBO,   // 颜色缓冲使用纹理，深度和模板缓冲使用 RBO，如 learnOpenGL 帧缓冲小节中的 FBO
+    FBO_CO_TEXT_DEPSTEN_RBO_MULTISAMPLE, // 颜色缓冲使用纹理，深度和模板缓冲使用 RBO，且使用多重采样，如 learnOpenGL 抗锯齿小节中的 framebuffer
+};
+
+class Framebuffer {
+public:
+    Framebuffer(GLuint width, GLuint height, FBO_TYPE type) : Width(width), Height(height) {
+        glGenFramebuffers(1, &FBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        if (type == FBO_COLOR_TEXT_ONLY) {
+            ColorBuffer = new TEXTURE2D_ATTACH();
+            ColorBuffer->Generate(width, height);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ColorBuffer->ID, 0);
+        } else if (type == FBO_DEPTH_TEXT_ONLY) {
+            DepthBuffer = new TEXTURE2D_ATTACH();
+            DepthBuffer->internal_format = GL_DEPTH_COMPONENT;
+            DepthBuffer->format = GL_DEPTH_COMPONENT;
+            DepthBuffer->data_type = GL_FLOAT;
+            DepthBuffer->filter_min = GL_NEAREST;
+            DepthBuffer->filter_max = GL_NEAREST;
+            DepthBuffer->wrap_s = GL_CLAMP_TO_BORDER;
+            DepthBuffer->wrap_t = GL_CLAMP_TO_BORDER;
+            DepthBuffer->Generate(width, height);
+            float borderColor[] = { 1.0, 1.0, 1.0, 1.0 }; // 趁还绑定在这个纹理上的时候设置边界颜色
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthBuffer->ID, 0);
+            glDrawBuffer(GL_NONE); // 显式声明不使用颜色数据进行渲染
+            glReadBuffer(GL_NONE);
+        } else if (type == FBO_CO_TEXT_DEPSTEN_RBO) {
+            ColorBuffer = new TEXTURE2D_ATTACH();
+            ColorBuffer->Generate(width, height);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ColorBuffer->ID, 0);
+            glGenRenderbuffers(1, &RBO);
+            glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+            // 使用同一个 RBO，附加到帧缓冲的深度*和*模板附件上
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+        } else if (type == FBO_CO_TEXT_DEPSTEN_RBO_MULTISAMPLE) {
+            // ColorBuffer = new TEXTURE2D_ATTACH();
+            // ColorBuffer->internal_format = GL_RGB;
+            // ColorBuffer->data_type = GL_UNSIGNED_BYTE;
+            // ColorBuffer->filter_min = GL_LINEAR;
+            // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, ColorBuffer->ID, 0);
+        } else {
+            std::cout << "Framebuffer type not supported!" << std::endl;
+            exit(-1);
+        }
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            std::cout << "Framebuffer not complete; Check framebuffers!" << std::endl;
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    ~Framebuffer() {
+        glDeleteFramebuffers(1, &FBO);
+        if (ColorBuffer) delete ColorBuffer;
+        if (DepthBuffer) delete DepthBuffer;
+        if (RBO) glDeleteRenderbuffers(1, &RBO);
+    }
+    void Bind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    }
+    void UnBind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    void Clear(unsigned int mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT) {
+        glClear(mask);
+    }
+    void Enable(unsigned int mask = GL_DEPTH_TEST) {
+        if (mask & GL_DEPTH_TEST) glEnable(GL_DEPTH_TEST);
+        if (mask & GL_STENCIL_TEST) glEnable(GL_STENCIL_TEST);
+    }
+    void Disable(unsigned int mask = GL_DEPTH_TEST) {
+        if (mask & GL_DEPTH_TEST) glDisable(GL_DEPTH_TEST);
+        if (mask & GL_STENCIL_TEST) glDisable(GL_STENCIL_TEST);
+    }
+    void BindColorBuffer(GLint unit = 0) {
+        ColorBuffer->Bind(unit);
+    }
+    void UnBindColorBuffer() {
+        ColorBuffer->UnBind();
+    }
+    void BindDepthBuffer(GLint unit = 0) {
+        DepthBuffer->Bind(unit);
+    }
+    void UnBindDepthBuffer() {
+        DepthBuffer->UnBind();
+    }
+
+private:
+    GLuint FBO; // 帧缓冲对象
+    GLuint Width, Height; // 帧缓冲的宽高
+    GLuint RBO; // 渲染缓冲对象
+    TEXTURE2D_ATTACH* ColorBuffer = nullptr; // 颜色缓冲纹理
+    TEXTURE2D_ATTACH* DepthBuffer = nullptr; // 深度缓冲纹理
+};
