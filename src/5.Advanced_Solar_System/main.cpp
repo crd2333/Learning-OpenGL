@@ -16,7 +16,7 @@
 #include "game_frame.h"
 #include "my_texture.hpp"
 #include "sphere.hpp"
-#include "cube.hpp"
+#include "skybox.hpp"
 #include "ubo.hpp"
 
 int main() {
@@ -25,35 +25,32 @@ int main() {
 
     // build and compile our shader program
     // sun use the original shader (with a texture)
-    Shader shader_sun("src/Solar_System/resources/sun.vs", "src/Solar_System/resources/sun.fs");
+    Shader shader_sun("src/5.Advanced_Solar_System/resources/sun.vs", "src/5.Advanced_Solar_System/resources/sun.fs");
     // other planets use the shader that deals with lighting (ambient, diffuse, specular), and use a texture as diffuse map
-    Shader shader_planet("src/Solar_System/resources/planet.vs", "src/Solar_System/resources/planet.fs");
+    Shader shader_planet("src/5.Advanced_Solar_System/resources/planet.vs", "src/5.Advanced_Solar_System/resources/planet.fs");
     // earth has specular texture, use a different shader
-    Shader shader_earth("src/Solar_System/resources/planet.vs", "src/Solar_System/resources/earth.fs");
+    Shader shader_earth("src/5.Advanced_Solar_System/resources/planet.vs", "src/5.Advanced_Solar_System/resources/earth.fs");
     // skybox shader
-    Shader shader_skybox("src/Solar_System/resources/skybox.vs", "src/Solar_System/resources/skybox.fs");
+    Shader shader_skybox("src/5.Advanced_Solar_System/resources/skybox.vs", "src/5.Advanced_Solar_System/resources/skybox.fs");
 
     // define the textures
     // textures come from https://www.solarsystemscope.com/textures/
-    MyTexture* sunText = new MyTexture("src/Solar_System/resources/textures/sun.jpg");
-    MyTexture* earthText = new MyTexture("src/Solar_System/resources/textures/earth.jpg");
-    MyTexture* marsText = new MyTexture("src/Solar_System/resources/textures/mars.jpg");
-    MyTexture* moonText = new MyTexture("src/Solar_System/resources/textures/moon.jpg");
-    MyTexture* earthSpecular = new MyTexture("src/Solar_System/resources/textures/earth_specular.jpg");
-    std::vector<std::string> faces {
-        "src/Solar_System/resources/textures/skybox/right.jpg",
-        "src/Solar_System/resources/textures/skybox/left.jpg",
-        "src/Solar_System/resources/textures/skybox/top.jpg",
-        "src/Solar_System/resources/textures/skybox/bottom.jpg",
-        "src/Solar_System/resources/textures/skybox/front.jpg",
-        "src/Solar_System/resources/textures/skybox/back.jpg"
-    };
-    MyTexture* skyboxText = new MyTexture(faces);
+    Texture2D* sunText = new Texture2D();
+    sunText->Generate("src/5.Advanced_Solar_System/resources/textures/sun.jpg");
+    Texture2D* earthText = new Texture2D();
+    earthText->Generate("src/5.Advanced_Solar_System/resources/textures/earth.jpg");
+    Texture2D* marsText = new Texture2D();
+    marsText->Generate("src/5.Advanced_Solar_System/resources/textures/mars.jpg");
+    Texture2D* moonText = new Texture2D();
+    moonText->Generate("src/5.Advanced_Solar_System/resources/textures/moon.jpg");
+    Texture2D* earthSpecular = new Texture2D();
+    earthSpecular->Generate("src/5.Advanced_Solar_System/resources/textures/earth_specular.jpg");
 
     // define a base sphere for all stars/planets/satellites
     Sphere sphere(Latitude_resolution, Longitude_resolution);
-    // define a cube for the skybox
-    Cube skybox;
+
+    // skybox
+    Skybox* skybox = new Skybox("src/5.Advanced_Solar_System/resources/textures/skybox");
 
     // set the fixed, shared properties of shaders
     // sun shader
@@ -66,9 +63,6 @@ int main() {
     shader_earth.use();
     shader_earth.setInt("material.diffuse", 0);
     shader_earth.setInt("material.specular", 1);
-    // skybox shader
-    shader_skybox.use();
-    shader_skybox.setInt("skybox", 0);
     // create and bind the uniform buffer objects
     UBO UBO_Proj_View(2 * sizeof(glm::mat4), 0, "Proj_View");
     UBO_Proj_View.Bind(shader_sun);
@@ -228,13 +222,7 @@ int main() {
         // ----------------- mars -----------------
 
         // render skybox at last
-        glDepthFunc(GL_LEQUAL); // 深度缓冲将会填上 1.0 值，所以第一次绘制完后之后将再也不会通过，因此要改为小于或等于
-        skyboxText->Bind(0);
-        shader_skybox.use();
-        shader_skybox.setMat4("projection", projection);
-        shader_skybox.setMat4("view", glm::mat4(glm::mat3(view))); // remove translation from the view matrix
-        skybox.draw(shader_skybox);
-        glDepthFunc(GL_LESS); // set back to default
+        skybox->draw(view, projection);
 
         GameFrame::RenderLoopPostProcess(window);
     }

@@ -197,6 +197,11 @@ int main() {
     unsigned int FBO; // 生成帧缓冲对象
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO); // 绑定
+    // 一个完整的帧缓冲需要满足以下的条件：
+    //   附加至少一个缓冲（颜色、深度或模板缓冲）
+    //   至少有一个颜色附件(Attachment)
+    //   所有的附件都必须是完整的（保留了内存）
+    //   每个缓冲都应该有相同的样本数(sample)
     // create a color attachment texture
     unsigned int textureColorbuffer;       // 生成纹理附件
     glGenTextures(1, &textureColorbuffer); // 当把一个纹理附加到帧缓冲的时候，所有的渲染指令将会写入到这个纹理中，就像它是一个普通的颜色/深度或模板缓冲一样

@@ -22,7 +22,7 @@ enum AttributeType { // adapt to different shaders
 // self define a class for all meshes to do those boring initialization and binding
 class MyMesh {
 protected:
-    unsigned int VAO, VBO, EBO = 0;
+    GLuint VAO, VBO, EBO = 0;
     std::vector<float> vertices;
     std::vector<int> indices;
     AttributeType attrType;
@@ -68,7 +68,7 @@ public:
         shader.use();
         glBindVertexArray(VAO);
         if (EBO != 0) // if has an indices
-            glDrawElements(mode, static_cast<unsigned int>(getNumIndices()), GL_UNSIGNED_INT, 0);
+            glDrawElements(mode, static_cast<GLuint>(getNumIndices()), GL_UNSIGNED_INT, 0);
         else
             glDrawArrays(mode, 0, getNumVertices());
     }
