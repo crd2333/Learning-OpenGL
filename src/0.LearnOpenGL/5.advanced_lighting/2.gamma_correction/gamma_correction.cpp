@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 #include <glm/glm.hpp>
@@ -69,7 +68,8 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // build and compile shaders
-    Shader shader("2.gamma_correction.vs", "2.gamma_correction.fs");
+    std::string file_dir = "src/0.LearnOpenGL/5.advanced_lighting/2.gamma_correction/";
+    Shader shader((file_dir + "gamma_correction.vs").c_str(), (file_dir + "gamma_correction.fs").c_str());
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float planeVertices[] = {
@@ -98,15 +98,14 @@ int main() {
     glBindVertexArray(0);
 
     // load textures
-    unsigned int floorTexture               = loadTexture("resources/textures/wood.png").c_str(), false);
-    unsigned int floorTextureGammaCorrected = loadTexture("resources/textures/wood.png").c_str(), true);
+    unsigned int floorTexture               = loadTexture("resources/textures/wood.png", false);
+    unsigned int floorTextureGammaCorrected = loadTexture("resources/textures/wood.png", true);
 
     // shader configuration
     shader.use();
     shader.setInt("floorTexture", 0);
 
     // lighting info
-    // -------------
     glm::vec3 lightPositions[] = {
         glm::vec3(-3.0f, 0.0f, 0.0f),
         glm::vec3(-1.0f, 0.0f, 0.0f),
@@ -151,7 +150,6 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, gammaEnabled ? floorTextureGammaCorrected : floorTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        std::cout << (gammaEnabled ? "Gamma enabled" : "Gamma disabled") << std::endl;
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -181,6 +179,7 @@ void processInput(GLFWwindow* window) {
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !gammaKeyPressed) {
         gammaEnabled = !gammaEnabled;
+        std::cout << (gammaEnabled ? "Gamma enabled" : "Gamma disabled") << std::endl;
         gammaKeyPressed = true;
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)

@@ -16,22 +16,26 @@ uniform vec3 viewPos;
 uniform float far_plane;
 uniform bool shadows;
 
+#define debug false
+
 float ShadowCalculation(vec3 fragPos)
 {
     // get vector between fragment position and light position
     vec3 fragToLight = fragPos - lightPos;
     // ise the fragment to light vector to sample from the depth map
-    float closestDepth = texture(depthMap, fragToLight).r;
+    float closestDepth = texture(depthMap, fragToLight).r; // 因为是三维纹理，所以直接用 vec3 来采样
     // it is currently in linear range between [0,1], let's re-transform it back to original depth value
     closestDepth *= far_plane;
     // now get current linear depth as the length between the fragment and light position
-    float currentDepth = length(fragToLight);
+    float currentDepth = length(fragToLight); // 因为之前我们把深度值存储为片段到光源的距离，这里我们也计算同样的距离来比较
     // test for shadows
     float bias = 0.05; // we use a much larger bias since depth is now in [near_plane, far_plane] range
     float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
     // display closestDepth as debug (to visualize depth cubemap)
     // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);
-
+    if (debug) {
+        return closestDepth / far_plane;
+    }
     return shadow;
 }
 
@@ -54,6 +58,10 @@ void main()
     spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
     vec3 specular = spec * lightColor;
     // calculate shadow
+    if (debug) {
+        FragColor = vec4(vec3(ShadowCalculation(fs_in.FragPos)), 1.0);
+        return;
+    }
     float shadow = shadows ? ShadowCalculation(fs_in.FragPos) : 0.0;
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
 

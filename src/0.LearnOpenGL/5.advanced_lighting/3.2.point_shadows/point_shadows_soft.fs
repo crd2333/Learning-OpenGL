@@ -27,8 +27,7 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
-float ShadowCalculation(vec3 fragPos)
-{
+float ShadowCalculation(vec3 fragPos) {
     // get vector between fragment position and light position
     vec3 fragToLight = fragPos - lightPos;
     // use the fragment to light vector to sample from the depth map
@@ -45,12 +44,9 @@ float ShadowCalculation(vec3 fragPos)
     // float bias = 0.05;
     // float samples = 4.0;
     // float offset = 0.1;
-    // for(float x = -offset; x < offset; x += offset / (samples * 0.5))
-    // {
-        // for(float y = -offset; y < offset; y += offset / (samples * 0.5))
-        // {
-            // for(float z = -offset; z < offset; z += offset / (samples * 0.5))
-            // {
+    // for(float x = -offset; x < offset; x += offset / (samples * 0.5)) {
+        // for(float y = -offset; y < offset; y += offset / (samples * 0.5)) {
+            // for(float z = -offset; z < offset; z += offset / (samples * 0.5)) {
                 // float closestDepth = texture(depthMap, fragToLight + vec3(x, y, z)).r; // use lightdir to lookup cubemap
                 // closestDepth *= far_plane;   // Undo mapping [0;1]
                 // if(currentDepth - bias > closestDepth)
@@ -61,11 +57,10 @@ float ShadowCalculation(vec3 fragPos)
     // shadow /= (samples * samples * samples);
     float shadow = 0.0;
     float bias = 0.15;
-    int samples = 20;
+    int samples = 20; // FCR 方法采样太多，在采样方向向量的垂直方向进行采样更有意义。我们可以用启发式方法，指定一些大体上分开来的偏移量方向
     float viewDistance = length(viewPos - fragPos);
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
-    for(int i = 0; i < samples; ++i)
-    {
+    for(int i = 0; i < samples; ++i) {
         float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
         closestDepth *= far_plane;   // undo mapping [0;1]
         if(currentDepth - bias > closestDepth)
@@ -79,8 +74,7 @@ float ShadowCalculation(vec3 fragPos)
     return shadow;
 }
 
-void main()
-{
+void main() {
     vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
     vec3 lightColor = vec3(0.3);

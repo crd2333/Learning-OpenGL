@@ -156,7 +156,6 @@ int main(int argc, char* argv[])
 }
 
 // renderQuad() renders a 1x1 XY quad in NDC
-// -----------------------------------------
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad()

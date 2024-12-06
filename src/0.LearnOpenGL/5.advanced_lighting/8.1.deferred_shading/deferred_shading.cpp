@@ -128,7 +128,6 @@ int main() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // lighting info
-    // -------------
     const unsigned int NR_LIGHTS = 32;
     std::vector<glm::vec3> lightPositions;
     std::vector<glm::vec3> lightColors;
@@ -243,7 +242,6 @@ int main() {
 }
 
 // renderCube() renders a 1x1 3D cube in NDC.
-// -------------------------------------------------
 unsigned int cubeVAO = 0;
 unsigned int cubeVBO = 0;
 void renderCube() {
@@ -317,7 +315,6 @@ void renderCube() {
 
 
 // renderQuad() renders a 1x1 XY quad in NDC
-// -----------------------------------------
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad() {

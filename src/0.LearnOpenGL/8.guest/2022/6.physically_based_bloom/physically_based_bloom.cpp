@@ -419,7 +419,6 @@ int main()
     }
 
     // lighting info
-    // -------------
     // positions
     std::vector<glm::vec3> lightPositions;
     lightPositions.push_back(glm::vec3( 0.0f, 0.5f,  1.5f));
@@ -613,7 +612,6 @@ int main()
 }
 
 // renderCube() renders a 1x1 3D cube in NDC.
-// -------------------------------------------------
 unsigned int cubeVAO = 0;
 unsigned int cubeVBO = 0;
 void renderCube()
@@ -688,7 +686,6 @@ void renderCube()
 }
 
 // renderQuad() renders a 1x1 XY quad in NDC
-// -----------------------------------------
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad()

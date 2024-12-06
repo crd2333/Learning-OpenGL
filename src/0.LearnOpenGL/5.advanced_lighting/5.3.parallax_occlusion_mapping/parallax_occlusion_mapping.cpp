@@ -84,7 +84,6 @@ int main() {
     shader.setInt("depthMap", 2);
 
     // lighting info
-    // -------------
     glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
 
     // render loop

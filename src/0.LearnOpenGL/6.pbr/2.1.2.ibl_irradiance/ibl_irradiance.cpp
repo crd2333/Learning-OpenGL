@@ -481,7 +481,6 @@ void renderSphere()
 }
 
 // renderCube() renders a 1x1 3D cube in NDC.
-// -------------------------------------------------
 unsigned int cubeVAO = 0;
 unsigned int cubeVBO = 0;
 void renderCube()

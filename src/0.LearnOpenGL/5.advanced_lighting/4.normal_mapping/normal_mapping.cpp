@@ -78,7 +78,6 @@ int main() {
     shader.setInt("normalMap", 1);
 
     // lighting info
-    // -------------
     glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
 
     // render loop

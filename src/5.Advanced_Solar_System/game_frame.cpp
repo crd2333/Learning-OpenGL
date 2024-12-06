@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 
 #include <glad/glad.h>
@@ -23,6 +21,8 @@ float lastFrame = 0.0f;
 
 // window
 bool mainMenu = false;
+bool ESC_pressed = false;
+bool ALT_pressed = false;
 float clearColor[3] = {0.0f, 0.0f, 0.0f};
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -43,29 +43,21 @@ void processInput(GLFWwindow* window) {
         camera.ProcessKeyboard(UP, deltaTime / 2  * speedUp);
 
     // 检测 ESC 键的按下事件，用于打开/关闭主菜单
-    static bool ESC_pressed = false;
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        if (!ESC_pressed) {
-            mainMenu = !mainMenu;
-            imguiFocus = mainMenu; // 默认开关菜单时也切换焦点
-            ChangeFocus(window, imguiFocus);
-            ESC_pressed = true;
-        }
-    } else {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS && !ESC_pressed) {
+        mainMenu = !mainMenu;
+        imguiFocus = mainMenu; // 默认开关菜单时也切换焦点
+        ChangeFocus(window, imguiFocus);
+        ESC_pressed = true;
+    } else if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE)
         ESC_pressed = false;
-    }
 
     // 检测 Left Alt 键的按下事件，用于切换鼠标焦点
-    static bool ALT_pressed = false;
-    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
-        if (!ALT_pressed) {
-            imguiFocus = !imguiFocus;
-            ChangeFocus(window, imguiFocus);
-            ALT_pressed = true;
-        }
-    } else {
+    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS && !ALT_pressed) {
+        imguiFocus = !imguiFocus;
+        ChangeFocus(window, imguiFocus);
+        ALT_pressed = true;
+    } else if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_RELEASE)
         ALT_pressed = false;
-    }
 }
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebuffer_size_callback([[maybe_unused]] GLFWwindow* window, int width, int height) {

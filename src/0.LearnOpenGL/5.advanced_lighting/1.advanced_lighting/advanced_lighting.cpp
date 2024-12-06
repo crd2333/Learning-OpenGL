@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 #include <glm/glm.hpp>
@@ -69,7 +68,8 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // build and compile shaders
-    Shader shader("1.advanced_lighting.vs", "1.advanced_lighting.fs");
+    std::string file_dir = "src/0.LearnOpenGL/5.advanced_lighting/1.advanced_lighting/";
+    Shader shader((file_dir + "advanced_lighting.vs").c_str(), (file_dir + "advanced_lighting.fs").c_str());
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float planeVertices[] = {
@@ -105,7 +105,6 @@ int main() {
     shader.setInt("texture1", 0);
 
     // lighting info
-    // -------------
     glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
     // render loop
@@ -138,7 +137,6 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -168,6 +166,7 @@ void processInput(GLFWwindow* window) {
 
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !blinnKeyPressed) {
         blinn = !blinn;
+        std::cout << "The lighting model is now " << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
         blinnKeyPressed = true;
     }
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)

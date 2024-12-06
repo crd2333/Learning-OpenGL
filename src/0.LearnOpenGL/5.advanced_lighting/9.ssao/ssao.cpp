@@ -183,7 +183,6 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // lighting info
-    // -------------
     glm::vec3 lightPos = glm::vec3(2.0, 4.0, -2.0);
     glm::vec3 lightColor = glm::vec3(0.2, 0.2, 0.7);
 
@@ -305,7 +304,6 @@ int main() {
 }
 
 // renderCube() renders a 1x1 3D cube in NDC.
-// -------------------------------------------------
 unsigned int cubeVAO = 0;
 unsigned int cubeVBO = 0;
 void renderCube() {
@@ -379,7 +377,6 @@ void renderCube() {
 
 
 // renderQuad() renders a 1x1 XY quad in NDC
-// -----------------------------------------
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
 void renderQuad() {

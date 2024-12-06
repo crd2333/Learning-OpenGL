@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 #include <glm/glm.hpp>
@@ -9,8 +8,7 @@
 
 #include <learnopengl/shader.h>
 #include <learnopengl/camera.h>
-#include <learnopengl/model.h>
-
+#include "FrameBuffer.hpp"
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -70,35 +68,35 @@ int main() {
     glEnable(GL_CULL_FACE);
 
     // build and compile shaders
-    Shader shader("3.2.1.point_shadows.vs", "3.2.1.point_shadows.fs");
-    Shader simpleDepthShader("3.2.1.point_shadows_depth.vs", "3.2.1.point_shadows_depth.fs", "3.2.1.point_shadows_depth.gs");
+    std::string file_dir = "src/0.LearnOpenGL/5.advanced_lighting/3.2.point_shadows/";
+    Shader shader((file_dir + "point_shadows.vs").c_str(), (file_dir + "point_shadows.fs").c_str());
+    Shader simpleDepthShader((file_dir + "point_shadows_depth.vs").c_str(), (file_dir + "point_shadows_depth.fs").c_str(), (file_dir + "point_shadows_depth.gs").c_str());
 
     // load textures
     unsigned int woodTexture = loadTexture("resources/textures/wood.png");
 
     // configure depth map FBO
-    // -----------------------
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-    unsigned int depthMapFBO;
-    glGenFramebuffers(1, &depthMapFBO);
-    // create depth cubemap texture
-    unsigned int depthCubemap;
-    glGenTextures(1, &depthCubemap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-    for (unsigned int i = 0; i < 6; ++i)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    // attach depth texture as FBO's depth buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    // unsigned int depthMapFBO;
+    // glGenFramebuffers(1, &depthMapFBO);
+    // // create depth cubemap texture
+    // unsigned int depthCubemap;
+    // glGenTextures(1, &depthCubemap);
+    // glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    // for (unsigned int i = 0; i < 6; ++i)
+    //     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // // attach depth texture as FBO's depth buffer
+    // glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    // glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+    // glDrawBuffer(GL_NONE);
+    // glReadBuffer(GL_NONE);
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    FrameBuffer depthMapFBO(SHADOW_WIDTH, SHADOW_HEIGHT, FBO_DEPTH_CUBE_ONLY);
 
     // shader configuration
     shader.use();
@@ -106,7 +104,6 @@ int main() {
     shader.setInt("depthMap", 1);
 
     // lighting info
-    // -------------
     glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
     // render loop
@@ -127,11 +124,13 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // 0. create depth cubemap transformation matrices
-        // -----------------------------------------------
         float near_plane = 1.0f;
         float far_plane  = 25.0f;
+        // 使用点光源，用透视投影矩阵，视野(fov) 设置为 90 度以包括整个立方体
         glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
         std::vector<glm::mat4> shadowTransforms;
+        // 分别看向立方体的六个面，实现万向阴影贴图
+        // 具体方向是怎么设置的？可以看这张图 https://uploads.disquscdn.com/images/317909012d5718e941aab3aad496bbc5673be4f377327a20b3b9cae2db5fc943.png
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)));
@@ -140,20 +139,21 @@ int main() {
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
 
         // 1. render scene to depth cubemap
-        // --------------------------------
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        // glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        // glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        // glClear(GL_DEPTH_BUFFER_BIT);
+        depthMapFBO.Bind();
+        depthMapFBO.Clear(GL_DEPTH_BUFFER_BIT);
         simpleDepthShader.use();
-        for (unsigned int i = 0; i < 6; ++i)
+        for (unsigned int i = 0; i < 6; ++i) // 利用 geometry shader 在一次渲染中渲染立方体的六个面。但其实这不一定比渲染 6 次更快（几何着色器有它自己的性能局限）
             simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
         simpleDepthShader.setFloat("far_plane", far_plane);
         simpleDepthShader.setVec3("lightPos", lightPos);
         renderScene(simpleDepthShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        depthMapFBO.UnBind();
 
         // 2. render scene as normal
-        // -------------------------
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
@@ -168,8 +168,9 @@ int main() {
         shader.setFloat("far_plane", far_plane);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, woodTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+        // glActiveTexture(GL_TEXTURE1);
+        // glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+        depthMapFBO.BindTextureBuffer(1);
         renderScene(shader);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
@@ -181,7 +182,6 @@ int main() {
 }
 
 // renders the 3D scene
-// --------------------
 void renderScene(const Shader &shader) {
     // room cube
     glm::mat4 model = glm::mat4(1.0f);
@@ -222,7 +222,6 @@ void renderScene(const Shader &shader) {
 }
 
 // renderCube() renders a 1x1 3D cube in NDC.
-// -------------------------------------------------
 unsigned int cubeVAO = 0;
 unsigned int cubeVBO = 0;
 void renderCube() {
