@@ -8,8 +8,8 @@ in vec3 shadowFragPos;
 
 #pragma include Light.glsl
 #pragma include Fog.glsl
-  
-uniform sampler2D texturez;  
+
+uniform sampler2D texturez;
 uniform vec3 viewPos;
 uniform Light sun;
 uniform sampler2D shadowMap;
@@ -75,4 +75,4 @@ void main()
     //float shadowTemp = texture(shadowMap, shadowSpacePos.xy).r;
     //FragColor = vec4(shadowTemp, shadowTemp, shadowTemp, 1.0);
     //FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-} 
+}

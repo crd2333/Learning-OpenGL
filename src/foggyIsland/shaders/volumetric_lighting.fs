@@ -13,7 +13,7 @@ void main()
 {
     //float confront = 1.0;
     //int sampleNr = samples;
-    // if(sunPos.z < 0.0 || sunPos.x < 0.0 || sunPos.x > 1.0 || sunPos.y < 0.0 || sunPos.y > 1.0){//when the sun is not in our sight, shut down god rays calculation. if not, with trees and other object together to render, the fps may become luggish. 
+    // if(sunPos.z < 0.0 || sunPos.x < 0.0 || sunPos.x > 1.0 || sunPos.y < 0.0 || sunPos.y > 1.0){//when the sun is not in our sight, shut down god rays calculation. if not, with trees and other object together to render, the fps may become luggish.
     //     confront = 0.0;
     //     sampleNr = 1;
     // }
@@ -31,7 +31,7 @@ void main()
     }
     color /= samples;
     color *= strength;//* decay
-    //color.x += 0.5; 
+    //color.x += 0.5;
     //color = texture(scene, TexCoords);
     // if(TexCoords.y > 0.666)
     //     color = vec4(0.0, 0.0, 1.0, 1.0);

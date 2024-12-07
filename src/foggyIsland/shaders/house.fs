@@ -16,8 +16,8 @@ in vec3 shadowFragPos;
 
 #pragma include Light.glsl
 #pragma include Fog.glsl
-  
-uniform Material material;  
+
+uniform Material material;
 uniform sampler2D lightDepthTexture;
 uniform sampler2D shadowMap;
 uniform vec3 viewPos;
@@ -64,4 +64,4 @@ void main()
     // vec3 test = (Normal + 1.0) * 0.5;
     // FragColor = vec4(test, 1.0);
     //FragColor = vec4(0.7, 0.1, 0.4, 1.0);
-} 
+}

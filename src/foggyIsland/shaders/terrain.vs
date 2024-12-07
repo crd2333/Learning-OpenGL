@@ -18,11 +18,11 @@ uniform bool isReflection;
 
 void main()
 {
-    texCoords = aTexCoords;  
+    texCoords = aTexCoords;
     normal = aNormal;
 
     worldFragPos = aPos;
-    
+
     gl_Position = projection * view * vec4(aPos, 1.0);
 
     vec4 shadowFrag = shadowMat * vec4(aPos, 1.0);

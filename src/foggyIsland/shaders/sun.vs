@@ -17,6 +17,6 @@ void main()
         vec3 cameraUp = vec3(view[0][1], view[1][1], view[2][1]);
         vec3 vert_world = sunPos + cameraRight * vertex.x * SCALE + cameraUp * vertex.y * SCALE;
         TexCoords = texCoords;
-        gl_Position = projection * view * vec4(vert_world, 1.0);        
+        gl_Position = projection * view * vec4(vert_world, 1.0);
         gl_Position.z = gl_Position.w - 0.001f;
 }

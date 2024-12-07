@@ -8,4 +8,4 @@ void main()
 {
     gl_Position = vec4(vertex * 2.0f, 1.0f);  // scale by 2.0 since plane is specified as -0.5 - 0.5 => should be -1.0 - 1.01
     TexCoords = texCoords;
-}  
+}

@@ -1,6 +1,6 @@
 struct Light {
     // Position
-    vec3 direction; 
+    vec3 direction;
     // Color
     vec3 lightColor;
 
