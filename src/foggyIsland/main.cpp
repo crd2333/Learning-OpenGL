@@ -27,7 +27,7 @@ const GLuint SCR_HEIGHT = 720;
 const float near = 0.1f;
 const float far = 750.0f;
 float heightScale = 0.1f;
-glm::vec2 terrainWaterSize = glm::vec2(750.0f);
+glm::vec2 terrainWaterSize = glm::vec2(750.0f); // 水和山的公用大小，山的地势低的时候被水覆盖
 float waterHeight = 2.f;
 const GLuint NR_TREES = 250;
 const GLfloat TREE_SCALE = 2.0f;
@@ -80,7 +80,7 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  // tell GLFW to capture our mouse
 
     // Initialize GLEW to setup the OpenGL Function pointers
     // glewExperimental = GL_TRUE;
@@ -110,12 +110,12 @@ int main() {
     Texture2D loadingTexture = ResourceManager::LoadTexture("src/foggyIsland/resources/textures/LoadingPicture.png", GL_TRUE, "lensstar");
     loadingShader.SetInteger("loadingPicture", 0, GL_TRUE);
     loadingTexture.Bind(0);
-    Geometry::DrawPlane();
+    Geometry::DrawPlane(); // 直接在屏幕上画一个四边形
     glfwSwapBuffers(window);
 
     // Load Models
     Model house("src/foggyIsland/models/house/farmhouse.obj");
-    house.calculateBoundingVolume();
+    house.calculateBoundingVolume(); // 每个模型抽象成球体计算包围球
     Model tree("src/foggyIsland/models/tree3/laubbaum.obj");
     tree.calculateBoundingVolume();
 
@@ -132,6 +132,7 @@ int main() {
     Shader applyPostProcessShader = ResourceManager::LoadShader("src/foggyIsland/shaders/post_processing.vs", "src/foggyIsland/shaders/applyPostProcess.fs", nullptr, "quad");
 
     // Load Textures
+    // 它的 terrain 只用了一种纹理，按我的想法应该要多个纹理，然后根据高度、法向来混合
     Texture2D textureTerrain = ResourceManager::LoadTexture("src/foggyIsland/resources/textures/grass_COLOR.png", GL_FALSE, "textureTerrain");
     Texture2D SunTexture = ResourceManager::LoadTexture("src/foggyIsland/resources/textures/sun.png", GL_TRUE, "lensstar");
 
@@ -147,7 +148,7 @@ int main() {
     treeShader.SetInteger("shadowMap", 3);
     volumetricShader.SetInteger("scene", 0, GL_TRUE);
     gaussianBlurShader.SetInteger("image", 0, GL_TRUE);
-    applyPostProcessShader.SetInteger("scene", 0, GL_TRUE);
+    applyPostProcessShader.SetInteger("scene", 0, GL_TRUE); // 后处理的 shader
     applyPostProcessShader.SetInteger("normalScene", 1);
 
     // Terrain
@@ -160,15 +161,16 @@ int main() {
     water.load("src/foggyIsland/resources/textures/water_dudv_blur.jpg", "src/foggyIsland/resources/textures/water_normal.jpg", 100.f);
 
     // Trees
+    // 使用实例化渲染，一次性渲染多个树
     const GLuint NR_TREES = 250;
     const GLfloat TREE_SCALE = 2.0f;
     srand(2348);
     std::vector<glm::mat4> trees;
-    for (GLuint i = 0; i < NR_TREES; i++) {
+    for (GLuint i = 0; i < NR_TREES; i++) { // tree 的世界坐标矩阵，随机生成位置
         GLint x = rand() % (int)terrain.getSize().x - terrain.getSize().x * 0.5f;
         GLint z = rand() % (int)terrain.getSize().y - terrain.getSize().y * 0.5f;
         float y = terrain.getHeight(x, z);
-        if (y < water.getHeight() + 0.5f)
+        if (y < water.getHeight() + 0.5f) // 保证树不会长在水面上
             continue;
         glm::mat4 model;
         GLfloat scale = TREE_SCALE + ((rand() % 25) - 7.5) / 10.0f;
@@ -179,12 +181,12 @@ int main() {
 
     // Houses
     std::vector<glm::vec3> houseLocs;
-    houseLocs.push_back(glm::vec3(-200, terrain.getHeight(-200, 80), 80));
+    houseLocs.push_back(glm::vec3(-200, terrain.getHeight(-200, 80), 80)); // xyz，y 由地形高度决定，设置 5 个房子
     houseLocs.push_back(glm::vec3(-225, terrain.getHeight(-225, 50), 50));
     houseLocs.push_back(glm::vec3(-226, terrain.getHeight(-226, 135), 135));
     houseLocs.push_back(glm::vec3(-23, terrain.getHeight(-23, 172), 172));
     houseLocs.push_back(glm::vec3(260.0f, terrain.getHeight(260.0f, 15.0f), 15.0f));
-    std::vector<glm::mat4> housesModels;
+    std::vector<glm::mat4> housesModels; // 以及它们的 model 矩阵
     for (GLuint i = 0; i < houseLocs.size(); i++) {
         glm::mat4 model;
         model = glm::translate(model, houseLocs[i]);
@@ -193,7 +195,7 @@ int main() {
     }
 
     // Skybox
-    Skybox skybox(&shaderSkybox);
+    Skybox skybox(&shaderSkybox); // 天空盒设置了昼夜变化
 
     skybox.loadDiurnalSkybox(
               "src/foggyIsland/resources/skybox/right.png",
@@ -214,7 +216,8 @@ int main() {
           );
 
     // Shadow framebuffer
-    GLuint const SHADOW_RESOLUTION = 4096; //8192;//
+    // 阴影的 FBO，它明明抽象了一个 Framebuffer 类，但是这里还是直接在外面写（感觉封装得不够好）
+    GLuint const SHADOW_RESOLUTION = 4096; //8192; // 阴影贴图的分辨率，越大越卡
     GLuint ShadowFBO;
     Texture2D shadowDepth;
     shadowDepth.Image_Format = GL_DEPTH_COMPONENT;
@@ -234,7 +237,7 @@ int main() {
         std::cout << "ERROR::SHADOW_FRAMEBUFFER" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    float lastTime{ 0.0f };
+    float lastTime{ 0.0f }; // 就是我们那边的 lastFrame
 
     // Set Projection Matrix
     glm::mat4 projection = camera.SetProjectionMatrix((float)SCR_WIDTH, (float)SCR_HEIGHT, near, far); // this remains unchanged for every frame
@@ -245,6 +248,9 @@ int main() {
     sunShader.SetMatrix4("projection", projection, GL_TRUE);
 
     // Sun
+    // setShader 就是设置这些 shader 的跟 sun 和 fog 相关的 uniform 变量，调用一次函数就把它们都设置好
+    // 我之前是用的 uniform buffer object 实现这种简便设置，相当于是在 OpenGL 层面，相对复杂一点；它这里是在 class 的层面
+    // 它的 uniform 变量用的会更多，不过开销上应该差不太多
     Light sun(lightDir, lightColor, ambientStrength, ambientColor);
     sun.setShader(shaderHouse, "sun", GL_TRUE);
     sun.setShader(shaderTerrain, "sun", GL_TRUE);
@@ -252,6 +258,7 @@ int main() {
     sun.setShader(treeShader, "sun", GL_TRUE);
 
     // Fog
+    // fog 是 foggyIsland 的重点，我们可以看情况要不要抄
     Fog fog(fogDensity, fogColor1);
     fog.setShader(shaderTerrain, "fog", GL_TRUE);
     fog.setShader(water.m_shader, "fog", GL_TRUE);
@@ -260,7 +267,7 @@ int main() {
     fog.setShader(shaderSkybox, "fog", GL_TRUE);
 
     // Trees - Instanced array
-    GLuint VBO_Trees;
+    GLuint VBO_Trees; // 实例化渲染的 VBO，需要自己像设置 VAO 一样绑定 attributes
     glGenBuffers(1, &VBO_Trees);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_Trees);
     glBufferData(GL_ARRAY_BUFFER, trees.size() * sizeof(glm::mat4), NULL, GL_STREAM_DRAW);
@@ -283,10 +290,14 @@ int main() {
     }
 
     // Render to Texture
+    // FBO，封装得不是很彻底
+    // 如果是不做 GODRAYS 的话，这里一个都用不到，直接渲染到默认帧缓冲，然后就没事了
+    // 否则，会先渲染到 intermediateFramebuffer，然后再渲染到 normalFramebuffer，最后再渲染到 volumetricFBO
     Framebuffer intermediateFramebuffer(SCR_WIDTH, SCR_HEIGHT);
     Framebuffer normalFramebuffer(SCR_WIDTH, SCR_HEIGHT);
     Framebuffer volumetricFBO(SCR_WIDTH, SCR_HEIGHT);
     Texture2D buffer1, buffer2; // Buffers used for ping-ponging between color attachments for Gaussian blur
+    // 这两个纹理 buffer（纹理附件）用作高斯模糊传来传去使用，高斯模糊应该是他要做体积光的时候用的
     buffer1.Internal_Format = GL_RGB16F;
     buffer1.Filter_Min = GL_LINEAR;
     buffer1.Mipmap = GL_FALSE;
@@ -305,7 +316,7 @@ int main() {
     volumetricFBO.ColorBuffer.Wrap_S = GL_CLAMP_TO_EDGE; // Clamp to edge so values do not leak into other sides of texture
     volumetricFBO.ColorBuffer.Wrap_T = GL_CLAMP_TO_EDGE;
 
-    //Render loop
+    // Render loop 下面进入渲染循环，将会比较复杂
     while (!glfwWindowShouldClose(window)) {
         float currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
@@ -314,59 +325,53 @@ int main() {
 
         if (UpdateTime > 1.f) {
             UpdateTime = 0.f;
-            glfwSetWindowTitle(window, ("Foggy Island   FPS : " + std::to_string(1.f / deltaTime)).c_str());
+            glfwSetWindowTitle(window, ("Foggy Island   FPS : " + std::to_string(1.f / deltaTime)).c_str()); // 帧率
         }
 
         processInput(window);
 
         // configure view matrices
         glm::mat4 view = camera.GetViewMatrix();
-        camera.CalculateViewFrustum();
-        glm::mat4 matProjectionView = projection * view;
+        camera.CalculateViewFrustum(); // 每次渲染重新计算相机视锥
+        glm::mat4 matProjectionView = projection * view; // 把二者合并，着色器内部少一个 uniform 变量和矩阵乘法
 
         // cull trees that are out of frustum
-        std::vector<glm::mat4> treeModels;
+        std::vector<glm::mat4> treeModels; // 删掉不在视锥体内的树
         for (GLuint i = 0; i < trees.size(); i++) {
             if (tree.isInFrustum(camera, trees[i]))
                 treeModels.push_back(trees[i]);
         }
         if (treeModels.size() > 0) {
             glBindBuffer(GL_ARRAY_BUFFER, VBO_Trees);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, treeModels.size() * sizeof(glm::mat4), &treeModels[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, treeModels.size() * sizeof(glm::mat4), &treeModels[0]); // 更新 VBO（实例化数组的 buffer data）
         }
 
         #pragma region SHADOW
+        // 首先是渲染阴影贴图
         /////////////////////////////////////////////////////////
         ///////////////////  SHADOW PASS  ///////////////////////
         /////////////////////////////////////////////////////////
 
         glViewport(0, 0, SHADOW_RESOLUTION, SHADOW_RESOLUTION);
-        glBindFramebuffer(GL_FRAMEBUFFER, ShadowFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, ShadowFBO); // 绑定阴影 FBO
         glClear(GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 lightMatrix;
+        // 正交投影模拟平行光
+        // 设置光源的视锥
         GLfloat orthoWidth = 150.0f;
         glm::mat4 lightProjection = glm::ortho(-orthoWidth, orthoWidth, -orthoWidth, orthoWidth, 25.0f, 350.0f);
+        // 光源的 view 矩阵，沿着光的方向走很远，然后看向摄像机的位置（照摄像机附近来显示出阴影）
         glm::mat4 lightView = glm::lookAt(sun.m_direction * 250.f + glm::vec3(camera.Position.x, 0.0f, camera.Position.z), glm::vec3(0.0f) + glm::vec3(camera.Position.x, 0.0f, camera.Position.z), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 biasMatrix = glm::mat4();
-        biasMatrix[0][0] = 0.5;
-        biasMatrix[0][1] = 0.0;
-        biasMatrix[0][2] = 0.0;
-        biasMatrix[0][3] = 0.0;
-        biasMatrix[1][0] = 0.0;
-        biasMatrix[1][1] = 0.5;
-        biasMatrix[1][2] = 0.0;
-        biasMatrix[1][3] = 0.0;
-        biasMatrix[2][0] = 0.0;
-        biasMatrix[2][1] = 0.0;
-        biasMatrix[2][2] = 0.5;
-        biasMatrix[2][3] = 0.0;
-        biasMatrix[3][0] = 0.5;
-        biasMatrix[3][1] = 0.5;
-        biasMatrix[3][2] = 0.5;
-        biasMatrix[3][3] = 1.0;
+        glm::mat4 biasMatrix = glm::mat4( // 用于将 NDC 空间 [-1,1]^3 转换到 [0, 1]^3 空间
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+            );
         lightMatrix = lightProjection * lightView; // Render texture as full texture, add bias only to final matrix (to reposition vertex to 0.0 - 1.0f space)
 
+        // simple shader 只会存储深度值，连颜色都不存储
         /***********************Terrain*********************/
         SimpleShader.Use();
         SimpleShader.SetMatrix4("lightMatrix", lightMatrix);
@@ -381,7 +386,7 @@ int main() {
 
         /***********************Trees*********************/
         if (treeModels.size() > 0) {
-            glDisable(GL_CULL_FACE);
+            glDisable(GL_CULL_FACE); // 对 tree，临时禁用背面剔除，没太懂
             treeSimpleShader.Use();
             treeSimpleShader.SetMatrix4("lightMatrix", lightMatrix);
             treeSimpleShader.SetFloat("time", glfwGetTime());
@@ -397,22 +402,24 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         lightMatrix = biasMatrix * lightMatrix; // Add bias to lightMatrix (convert NDC to [0.0, 1.0] interval)
+                                                // 上面阴影映射时用 NDC，下面？
 
-        #pragma endregion SHADOW
+        #pragma endregion SHADOW // SHADOW 区域中的所有渲染都会被保存到阴影贴图中（主要是记录那个深度值），用于后续的正常渲染
 
         #pragma region REFRACTION
         ///////////////////////////////////////////////////////////
         ///////////////////  REFRACTION PASS  /////////////////////
         ///////////////////////////////////////////////////////////
 
-        water.initPassRefraction();
+        water.initPassRefraction(); // 会开启裁剪平面，只渲染水下部分
 
         /**********************Terrain********************/
+        // 水下部分只需管 terrain
         shaderTerrain.SetMatrix4("view", view, GL_TRUE);
         shaderTerrain.SetInteger("isRefraction", GL_TRUE);
         shaderTerrain.SetInteger("isReflection", GL_FALSE);
         shaderTerrain.SetFloat("waterHeight", water.getHeight());
-        shaderTerrain.SetMatrix4("shadowMat", lightMatrix);
+        shaderTerrain.SetMatrix4("shadowMat", lightMatrix); // 这个 shadowMat 就是那个把 view space 坐标转换到光源空间的 T 矩阵
         shaderTerrain.SetVector3f("viewPos", camera.Position);
         textureTerrain.Bind(0);
         shadowDepth.Bind(1);
@@ -428,9 +435,9 @@ int main() {
         ///////////////////////////////////////////////////////////
 
         // now use a imaginary camera on the counter position under watersurface
-        glm::mat4 imgView = camera.GetImaginaryViewMatrix(water.getHeight());
+        glm::mat4 imgView = camera.GetImaginaryViewMatrix(water.getHeight()); // 与现摄像机相对水面对称
 
-        water.initPassReflection();
+        water.initPassReflection(); // 会开启裁剪平面，只渲染水上部分，并且把面的正向设置为顺时针
 
         /**********************Terrain********************/
         shaderTerrain.SetMatrix4("view", imgView, GL_TRUE);
@@ -482,11 +489,13 @@ int main() {
         ///////////////////////////////////////////////////////////
         ///////////////////////  GOD RAYS  ////////////////////////
         ///////////////////////////////////////////////////////////
-        if (doGodRays) {
+        // 所谓 GOD RAYS 就是光线穿过空气中的尘埃或雾气时产生的光束效果，即体积光相关的东西
+        if (doGodRays) { // 如果要做 GOD RAYS，就需要先渲染到 intermediateFramebuffer
             intermediateFramebuffer.BeginRender();
 
             SimpleShader.Use();
             SimpleShader.SetMatrix4("lightMatrix", matProjectionView);
+            // 使用 simple shader 渲染场景，它连颜色都不会有，单纯是用来计算深度值
 
             /***********************Houses*********************/
             for (GLuint i = 0; i < housesModels.size(); i++) {
@@ -523,13 +532,15 @@ int main() {
             }
 
             /***********************Sun*********************/
+            // 只有在 GOD RAYS 时才会绘制太阳，这是体积光的第一步
             sunShader.Use();
             sunShader.SetMatrix4("view", glm::mat4(glm::mat3(view)));// when player walks forward the sun won't be left behind, so to keep the sun around the player, don't translate
+            // 太阳被绘制在沿着光线方向很远的位置（深度非常远）
             sunShader.SetVector3f("sunPos", sun.m_direction * 250.f);// check here when the sun quad is too big // debug
             SunTexture.Bind(0);
-            Geometry::DrawPlane();
+            Geometry::DrawPlane(); // 然后画一个平面，但是由纹理它会画成一个白色圆片
 
-            intermediateFramebuffer.EndRender();
+            intermediateFramebuffer.EndRender(); // 总之，intermediateFramebuffer 里面就只有一个有颜色的太阳圆片，有颜色的树木，和一堆不会画颜色的只有深度值（深度纹理）的玩意儿
         }
         #pragma endregion GOD_RAYS
 
@@ -538,6 +549,8 @@ int main() {
         /////////////////////  NORMAL PASS  ///////////////////////
         ///////////////////////////////////////////////////////////
 
+        // 如果之前做了 GOD RAYS，渲染结果先存到 normalFramebuffer，之后还要做后处理；
+        // 否则直接渲染到屏幕（默认 framebuffer），之后就没事了
         if (doGodRays)
             normalFramebuffer.BeginRender();
         else {
@@ -595,13 +608,15 @@ int main() {
             normalFramebuffer.EndRender();
         #pragma endregion NORMAL
 
-        #pragma region POST_PROCESSING
+        #pragma region POST_PROCESSING // 只有之前做了 GOD RAYS 才会做 POST PROCESSING（后处理）
         ///////////////////////////////////////////////////////////
         ////////////////////  POST PROCESSING  ////////////////////
         ///////////////////////////////////////////////////////////
         if (doGodRays) {
+            // 后处理干的事情就是体积光和高斯模糊
             glDisable(GL_DEPTH_TEST);
 
+            // 第二步：体积光，以太阳的圆心为中心做放射状的径向模糊
             volumetricFBO.BeginRender();
 
             volumetricShader.SetVector2f("sunPos", sunPos, true);
@@ -610,10 +625,11 @@ int main() {
             intermediateFramebuffer.ColorBuffer.Bind(0);
             Geometry::DrawPlane();
 
-            volumetricFBO.EndRender();
+            volumetricFBO.EndRender(); // volumetricFBO 里面把 intermediateFramebuffer 的内容做了径向模糊（算是体积光近似？）
 
+            // 第三步：高斯模糊，继续在 volumetricFBO 里面渲染
             // Gaussian blur
-            int blur_iterations = 4;
+            int blur_iterations = 4; // 迭代次数，每次要么做水平模糊要么做垂直模糊
             buffer1 = volumetricFBO.ColorBuffer;
             volumetricFBO.Bind();
             volumetricFBO.UpdateColorBufferTexture(buffer2);
@@ -621,9 +637,8 @@ int main() {
             volumetricFBO.BeginRender();
             for (int i = 0; i < blur_iterations; i++) {
                 for (int n = 0; n < 2; n++) {
-                    // Horizontal or vertical based on n
-                    gaussianBlurShader.SetInteger("horizontal", n == 0 ? 1 : 0);
-                    volumetricFBO.UpdateColorBufferTexture(n == 0 ? buffer2 : buffer1);
+                    gaussianBlurShader.SetInteger("horizontal", n == 0 ? 1 : 0); // Horizontal or vertical based on n
+                    volumetricFBO.UpdateColorBufferTexture(n == 0 ? buffer2 : buffer1); // 在两个 buffer 之间传递（ping-pong）
                     if (n == 0)
                         buffer1.Bind(0);
                     else
@@ -633,7 +648,7 @@ int main() {
             }
             volumetricFBO.EndRender();
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0); // 最后，渲染到默认 framebuffer，使用 applyPostProcessShader，把正常渲染的内容和光照效果结合（直接加）
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             applyPostProcessShader.Use();

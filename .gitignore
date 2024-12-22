@@ -4,6 +4,7 @@ lib/
 other/
 output/
 resources/
+src/load_model/model
 
 *.o
 *.d

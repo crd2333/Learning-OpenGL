@@ -44,7 +44,7 @@ void main()
 
         const float blurSize = 0.00020;//0.00025;
 
-        for(float x = -blurSize; x <= blurSize; x+= blurSize)
+        for(float x = -blurSize; x <= blurSize; x+= blurSize) // 阴影采样
         {
             for(float y = -blurSize; y <= blurSize; y+= blurSize)
             {

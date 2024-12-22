@@ -76,7 +76,7 @@ int main() {
     std::string file_dir = "src/0.LearnOpenGL/5.advanced_lighting/3.1.shadow_mapping/";
     Shader shader((file_dir + "shadow_mapping.vs").c_str(), (file_dir + "shadow_mapping.fs").c_str());
     Shader simpleDepthShader((file_dir + "shadow_mapping_depth.vs").c_str(), (file_dir + "shadow_mapping_depth.fs").c_str());
-    Shader debugDepthQuad((file_dir + "debug_quad.vs").c_str(), (file_dir + "debug_quad_depth.fs").c_str());
+    Shader debugDepthQuad((file_dir + "debug_quad_depth.vs").c_str(), (file_dir + "debug_quad_depth.fs").c_str());
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float planeVertices[] = {

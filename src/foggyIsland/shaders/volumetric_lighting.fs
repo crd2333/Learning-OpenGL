@@ -9,8 +9,7 @@ uniform int samples = 100;
 //uniform float weightDecrement = 0.99;//0.95;
 uniform float strength = 0.9;
 
-void main()
-{
+void main() {
     //float confront = 1.0;
     //int sampleNr = samples;
     // if(sunPos.z < 0.0 || sunPos.x < 0.0 || sunPos.x > 1.0 || sunPos.y < 0.0 || sunPos.y > 1.0){//when the sun is not in our sight, shut down god rays calculation. if not, with trees and other object together to render, the fps may become luggish.
@@ -23,9 +22,9 @@ void main()
     //color = texture(scene, TexCoords);
     vec2 samplePoint = TexCoords;
     //float weight = 1.0;
-    for(int i = 0; i < samples; i++)
-    {
-        color += texture(scene, samplePoint);// * weight;
+    for(int i = 0; i < samples; i++)     { // 沿着从当前片段到太阳位置的光线方向进行多次采样
+                                           // 说是体积光，其实只是在 2D scene 这个纹理上采样
+        color += texture(scene, samplePoint); // * weight;
         //weight *= weightDecrement;
         samplePoint -= pace;
     }

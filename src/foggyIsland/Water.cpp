@@ -13,8 +13,8 @@ Water::Water(const glm::vec2 &size, const float &height) : m_size(size), m_heigh
 
     // Texture samplers
     m_shader.Use();
-    m_shader.SetInteger("refraction", 0);
-    m_shader.SetInteger("reflection", 2);
+    m_shader.SetInteger("refraction", 0); // 折射
+    m_shader.SetInteger("reflection", 2); // 反射
 }
 
 Water::~Water() {
@@ -33,8 +33,11 @@ void Water::load(std::string dudvMap, std::string normalMap, const float &scaleT
     m_shader.SetFloat("scaleTex", scaleTex);
 }
 
+// 绑定四个纹理，渲染器用的 water.vs 和 water.fs
 void Water::render() {
     // Textures
+    // dudv map 是位移贴图，normal map 是法线贴图，用于模拟水波效果
+    // refraction 是折射纹理，reflection 是反射纹理，它们作为纹理附件附加到帧缓冲对象上，用于水的折射和反射效果
     glActiveTexture(GL_TEXTURE0);
     m_texRefraction.Bind();
     glActiveTexture(GL_TEXTURE1);
@@ -50,10 +53,10 @@ void Water::render() {
 }
 
 void Water::initPassRefraction() {
-    glEnable(GL_CLIP_DISTANCE0);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
-    glClearColor(0.18f, 0.2f, 0.18f, 1.0f);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texRefraction.ID, 0);
+    glEnable(GL_CLIP_DISTANCE0); // 开启裁剪平面
+    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO); // 渲染到 FBO 而不是默认帧缓冲上
+    glClearColor(0.18f, 0.2f, 0.18f, 1.0f);   // 设置清空颜色，这好像也还是黑色，只不过绿色深一点点
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texRefraction.ID, 0); // 这里才把纹理绑定到 FBO 上
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -64,7 +67,7 @@ void Water::terminatePassRefraction() {
 }
 
 void Water::initPassReflection() {
-    glFrontFace(GL_CW);// in reflection pass, camera is mirrored, so faces are mirrored too
+    glFrontFace(GL_CW);// in reflection pass, camera is mirrored, so faces are mirrored too（改成顺时针为正面）
     glEnable(GL_CLIP_DISTANCE0);
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
     glClearColor(0.18f, 0.2f, 0.18f, 1.0f);
@@ -87,7 +90,8 @@ void Water::init_data() {
         -0.5f, 0.0f,  0.5f, 0.0f, 1.0f,
         0.5f, 0.0f, -0.5f, 1.0f, 0.0f,
         0.5f, 0.0f,  0.5f, 1.0f, 1.0f
-    };
+    }; // 直接用 triangle_strip 画整个场景的平面水（海平面）
+       // 我们的话，我不太想弄一个整个海那么大的，还是指定一个特定位置的矩形，但是可以被山体遮挡这样就弄出池塘来
 
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
@@ -117,6 +121,7 @@ void Water::init_data() {
     // generate framebuffer
     glGenFramebuffers(1, &m_FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+    // 绑定渲染缓冲对象(RBO)到帧缓冲对象(FBO)
     glGenRenderbuffers(1, &m_RBO);
     glBindRenderbuffer(GL_RENDERBUFFER, m_RBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 720);

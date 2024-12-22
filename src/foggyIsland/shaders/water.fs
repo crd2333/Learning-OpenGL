@@ -23,10 +23,10 @@ const float DISTORTION_SCALE = 0.01;
 const float WAVE_SCALE = 0.03;
 //const vec3 OCEAN_BLUE = vec3(0.0078, 0.2157, 1.0);
 
-void main()
-{
+void main() {
     float invW = 1.0 / projectionPos.w;
     vec2 texCoordRefX = vec2((projectionPos.x * invW + 1.0) * 0.5, (projectionPos.y * invW + 1.0) * 0.5);
+
     vec4 distortion = texture(dudvMap, texcoord) * DISTORTION_SCALE;
     distortion.x = pow(distortion.x, 0.781);
     distortion.y = pow(distortion.y, 0.781);

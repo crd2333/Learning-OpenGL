@@ -66,11 +66,11 @@ int main() {
 
     // build and compile shaders
     Shader ourShader(
-        "D:\\documents\\OpenGL\\src\\LearnOpenGL\\3.model_loading\\model_loading.vs",
-        "D:\\documents\\OpenGL\\src\\LearnOpenGL\\3.model_loading\\model_loading.fs");
+        "D:\\documents\\OpenGL\\src\\0.LearnOpenGL\\3.model_loading\\model_loading.vs",
+        "D:\\documents\\OpenGL\\src\\0.LearnOpenGL\\3.model_loading\\model_loading.fs");
 
     // load models
-    Model ourModel("D:\\documents\\OpenGL\\resources\\objects\\backpack\\backpack.obj");
+    Model ourModel("D:\\documents\\OpenGL\\resources\\objects\\sword\\Untitled.obj");
 
     // draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -86,7 +86,7 @@ int main() {
         processInput(window);
 
         // render
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // don't forget to enable shader before setting uniforms

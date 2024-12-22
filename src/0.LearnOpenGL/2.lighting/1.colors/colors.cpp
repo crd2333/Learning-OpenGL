@@ -64,8 +64,9 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     // build and compile our shader zprogram
-    Shader lightingShader("1.colors.vs", "1.colors.fs");
-    Shader lightCubeShader("1.light_cube.vs", "1.light_cube.fs");
+    std::string file_dir = "src/0.LearnOpenGL/2.lighting/1.colors/";
+    Shader lightingShader((file_dir + "1.colors.vs").c_str(), (file_dir + "1.colors.fs").c_str());
+    Shader lightCubeShader((file_dir + "1.colors.vs").c_str(), (file_dir + "1.light_cube.fs").c_str());
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float vertices[] = {

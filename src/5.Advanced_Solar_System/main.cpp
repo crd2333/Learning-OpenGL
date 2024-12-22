@@ -144,6 +144,10 @@ int main() {
         UBO_Light.setData(60, sizeof(float), &attenuation_constant);
         UBO_Light.setData(64, sizeof(float), &attenuation_linear);
         UBO_Light.setData(68, sizeof(float), &attenuation_quadratic);
+        shader_earth.use();
+        shader_earth.setVec3("viewPos", camera.Position);
+        shader_planet.use();
+        shader_planet.setVec3("viewPos", camera.Position);
 
         float time = glfwGetTime();
 

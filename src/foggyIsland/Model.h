@@ -20,6 +20,8 @@
 #include <vector>
 using namespace std;
 
+// 基本上是从 learnopengl/model.h 来的，但是加了 calculateBoundingVolume() 和 isInFrustum() 两个函数
+// 前者是计算包围球，后者是检查是否在视锥体内
 
 GLint TextureFromFile(const char* path, string directory);
 
@@ -45,6 +47,7 @@ public:
     }
 
     // Calculates bounding volume
+    // 把每个模型抽象成一个球体，并计算出这个球体的球心和半径
     void calculateBoundingVolume() {
         glm::vec3 avr = glm::vec3(0.f);
         float max_length{0.f};
@@ -70,7 +73,7 @@ public:
         glm::vec3 center = glm::vec3(model * glm::vec4(m_center, 1.f));
         float radius = 2.f * m_radius * model[0][0]; // Ensure the shadow can last a while when the object goes out of sight(frustum)
         // Check if sphere touches any part of frustum
-        for (GLuint i = 0; i < 6; ++i) {
+        for (GLuint i = 0; i < 6; ++i) { // 球心已经离开视锥体两个半径以上的距离，才判定该模型不在视野内（避免阴影等受到影响）
             if (camera.Frustum[i].Distance(center) < -radius) // negative radius since outside of plane gives negative distance
                 return false;
         }
@@ -235,6 +238,8 @@ GLint TextureFromFile(const char* path, string directory) {
     unsigned char* image = stbi_load(filename.c_str(), &width, &height, 0, STBI_rgb);
     // Assign texture to ID
     glBindTexture(GL_TEXTURE_2D, textureID);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    // glGenerateMipmap(GL_TEXTURE_2D);
     if (image) {
         // glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "Terrain.h"
-
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -17,6 +16,10 @@ enum Camera_Movement {
     RIGHT
 };
 
+// 大部分是来自 learnopengl/camera.h，但是加了一些视锥体之类的东西
+// 还有和 terrain 有点耦合，是因为它要控制摄像机不陷进地里
+// 对我们来说，应该是限定人物不陷进地里，摄像机绑在人物的后上方一定距离
+
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
@@ -24,15 +27,18 @@ const float SPEED = 30.f;//8.f;
 const float SENSITIVITY = 0.03f;//0.1f;
 const float ZOOM = 45.0f;
 
+// 抽象出了一个平面类（用法向量和一个点来定义一个平面），用于计算视锥体
 struct Plane {
     glm::vec3 Normal;
     glm::vec3 Point;
-    GLfloat   D;
+    GLfloat   D;  // (A,B,C) dot (x,y,z) + D = 0 的 D
 
     void CalcDistance() {
         D = glm::dot(-Normal, Point); // See http://www.lighthouse3d.com/tutorials/maths/plane/
     }
 
+    // 距离计算：[(A,B,C) dot (x,y,z) + D] / sqrt(A^2 + B^2 + C^2)
+    // 只要法向量是单位向量，分母就是 1
     GLfloat Distance(glm::vec3 point) {
         return glm::dot(Normal, point) + D;
     }
@@ -123,7 +129,7 @@ public:
             Position += Right * velocity;
 
         float terrainHeight = m_terrain->getHeight(Position.x, Position.z);
-        if (Position.y < terrainHeight + 6.f)
+        if (Position.y < terrainHeight + 6.f) // 保证摄像机不陷进地里
             Position.y = terrainHeight + 6.f;
         //std::cout << "Position = " << Position.x << ", " << Position.y << ", " << Position.z << "\n";
     }
@@ -160,6 +166,8 @@ public:
 
     // (Re)calculates the view frustum planes of the camera's current position/orientation.
     // For a more in-depth description of the algorithm see http://www.lighthouse3d.com/tutorials/view-frustum-culling/geometric-approach-extracting-the-planes/
+    // 视锥体是个六面的玩意儿，图在这 https://i0.wp.com/www.lighthouse3d.com/wp-content/uploads/2011/04/vfpoints.gif
+    // 只有在视锥体内的物体才会被渲染，这样可以提高渲染效率
     void CalculateViewFrustum() {
         // 1. First calculate all 8 points of the frustum (corners)
         // - Naming convention: (n=near,f=far)(t=top,b=bottom)(l=left,r=right)
@@ -180,6 +188,7 @@ public:
 
         // 2. Create planes out of plane normals and positions (note: all normals point inside frustum)
         // - 2.1 - Near/Far plane (trick: use front vector as normal and nc/fc as points on pane)
+        // 注意它这边法向量设置为指向内为正，所以点在视锥体外距离是负的
         this->Frustum[0].Normal = this->Front;
         this->Frustum[0].Point = nc;
         this->Frustum[1].Normal = -this->Front;

@@ -12,8 +12,7 @@ void main()
 {
     vec3 pos = vertex;
     texcoord = aTexcoord;
-    if(aTexcoord.x < 0.3)
-    {
+    if(aTexcoord.x < 0.3) { // 如果是树叶（这个值有点保守），则让树叶随时间摆动
         pos.x += sin(time * 1.0 + vertex.x) * 0.10;
         pos.z += cos(time / 2.0 + vertex.z) * 0.075;
     }

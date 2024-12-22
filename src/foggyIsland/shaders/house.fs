@@ -38,7 +38,7 @@ void main()
     vec3 shadowSpacePos = shadowFragPos;
     shadowSpacePos.z -= 0.001f;
     float shadow = 0.0;
-    for(float x = -0.0005; x <= 0.0005; x+= 0.00025)
+    for(float x = -0.0005; x <= 0.0005; x+= 0.00025) // 阴影采样
     {
         for(float y = -0.0005; y <= 0.0005; y+= 0.00025)
         {

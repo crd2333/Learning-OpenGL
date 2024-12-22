@@ -14,6 +14,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// 基本上跟 learnopengl 的 shader.h 差不多，API 可能变了一点点
 
 // General purpsoe shader object. Compiles from file, generates
 // compile/link-time error messages and hosts several utility

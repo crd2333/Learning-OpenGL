@@ -22,10 +22,10 @@
 // and/or shader is also stored for future reference by string
 // handles. All functions and resources are static and no
 // public constructor is defined.
-class ResourceManager {
+class ResourceManager { // 一个静态类，全是静态成员函数和变量，没法构造一个对象（感觉不叫单例类，应该叫无实例类）
 public:
     // Resource storage
-    static std::map<std::string, Shader>    Shaders;
+    static std::map<std::string, Shader>    Shaders;  // 给这些资源起名字，方便后面调用
     static std::map<std::string, Texture2D> Textures;
     // Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
     static Shader    &LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, const GLchar* gShaderFile, std::string name);

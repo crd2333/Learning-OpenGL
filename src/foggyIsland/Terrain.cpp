@@ -9,6 +9,7 @@ Terrain::~Terrain() {
     glDeleteBuffers(1, &m_VBO);
 }
 
+// vec2(750.0f), 37.5f, 300.0f
 void Terrain::load(const glm::vec2 &size, const float &heightScale, const float &textureScale, std::string HeightMapLoc) {
     // unsigned char* heightMap = SOIL_load_image(HeightMapLoc.c_str(), &m_cols, &m_rows, 0, SOIL_LOAD_L);
     unsigned char* heightMap = stbi_load(HeightMapLoc.c_str(), &m_cols, &m_rows, 0, STBI_rgb);
@@ -58,14 +59,18 @@ void Terrain::generateMesh(const glm::vec2 &size, const float &heightScale, cons
     m_size = size;
 
     /************************** Generate Vertices and TexCoords ************************/
+    // 预留 rows * cols 个 vec3 和 vec2 空间
     m_vertices = std::vector<std::vector<glm::vec3>>(rows, std::vector<glm::vec3>(cols));
     m_texCoords = std::vector<std::vector<glm::vec2>>(rows, std::vector<glm::vec2>(cols));
     for (GLuint i = 0; i < rows; i++) {
         for (GLuint j = 0; j < cols; j++) {
             float luminance = heightMap[i * cols + j];
-            float height = luminance / 255.f * heightScale;
+            float height = luminance / 255.f * heightScale; // 根据图像灰度值计算高度
+            // i, j 原本在 0 ~ rows - 1 和 0 ~ cols - 1 之间
+            // 现在将其映射到 -0.5 ~ 0.5 之间
             float scaleCol = j / (cols - 1.f) - 0.5f;
             float scaleRow = i / (rows - 1.f) - 0.5f;
+            // 然后乘上 size.x 和 size.y 得到真实的世界坐标
             m_vertices[i][j] = glm::vec3(scaleCol * size.x, height, scaleRow * size.y);
             m_texCoords[i][j] = glm::vec2(scaleCol * textureScale, scaleRow * textureScale);
         }
@@ -85,6 +90,7 @@ void Terrain::generateMesh(const glm::vec2 &size, const float &heightScale, cons
                 1   /           |
                  1--------------2
             */
+            // 注意索引生成顺序，这样从高处看表示正面
             // upper triangle, in counter clockwise
             m_indices.push_back(i * cols + j);
             m_indices.push_back((i + 1) * cols + j);
@@ -101,6 +107,9 @@ void Terrain::generateMesh(const glm::vec2 &size, const float &heightScale, cons
     /************************** Generate Normals ************************/
     // 1. calculate per-face normals
     std::vector<std::vector<glm::vec3>> m_faceNormals[2];
+    // 预留 2 * (rows - 1) * (cols - 1) 个 vec3 空间，计算每个面的法向量
+    // 由于是比较规整的 2D 网格表示，所以面的数量是固定的 2 * (rows - 1) * (cols - 1)
+    // upper 用 0，lower 用 1
     m_faceNormals[0] = std::vector<std::vector<glm::vec3>>(rows - 1, std::vector<glm::vec3>(cols - 1));
     m_faceNormals[1] = std::vector<std::vector<glm::vec3>>(rows - 1, std::vector<glm::vec3>(cols - 1));
     for (GLuint i = 0; i < rows - 1; i++) {
@@ -130,6 +139,7 @@ void Terrain::generateMesh(const glm::vec2 &size, const float &heightScale, cons
         }
     }
     // 2. sum up all per-face normals around a vertex to get per-vertex normals, i.e. smooth operation
+    // 然后逐顶点计算法向量，注意边界情况
     m_normals = std::vector<std::vector<glm::vec3>>(rows, std::vector<glm::vec3>(cols));
     for (GLuint i = 0; i < rows; i++) {
         for (GLuint j = 0; j < cols; j++) {
@@ -169,6 +179,7 @@ void Terrain::bufferUpdate() {
     std::vector<glm::vec2> texCoords;
     std::vector<glm::vec3> normals;
 
+    // 低效移动。。。但初始化不会影响太多
     for (GLuint i = 0; i < m_rows; i++) {
         for (GLuint j = 0; j < m_cols; j++) {
             vertices.push_back(m_vertices[i][j]);
@@ -200,6 +211,8 @@ void Terrain::bufferUpdate() {
     glBindVertexArray(0);
 }
 
+
+// 这个重心坐标插值只是计算高度用的，pos 是 terrain 平面上的坐标，p1, p2, p3 是三角形的三个顶点
 float Terrain::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 pos) {
     GLfloat det = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.z - p3.z);
     GLfloat l1 = ((p2.z - p3.z) * (pos.x - p3.x) + (p3.x - p2.x) * (pos.y - p3.z)) / det;
