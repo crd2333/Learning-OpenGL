@@ -93,11 +93,12 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // build and compile shaders
-    Shader ourShader("src/load_model/vertex_color.vs", "src/load_model/vertex_color.fs");
+    // Shader ourShader("src/load_model/vertex_color.vs", "src/load_model/vertex_color.fs");
+    Shader ourShader("src/load_model/model_loading.vs", "src/load_model/model_loading.fs");
 
     // load models
-    // Model ourModel("src/load_model/model/sheika/Untitled.obj");
-    MeshVC bomb("src/load_model/model/bomb/bomb_vc.txt");
+    Model ourModel("src/load_model/model/TreeApple/TreeApple_M.obj");
+    // MeshVC bomb("src/load_model/model/bomb/bomb_vc.txt");
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -141,7 +142,7 @@ int main() {
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
-        bomb.draw(ourShader);
+        ourModel.Draw(ourShader);
 
         // render ImGui
         ImGui::Render();
