@@ -1,0 +1,104 @@
+# 3ds Max Wavefront OBJ Exporter v0.99 - (c)2007 guruware
+# File Created: 21.12.2024 21:57:30
+
+newmtl wire_255255000
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 1.0000 1.0000 0.0000
+	Kd 1.0000 1.0000 0.0000
+	Ks 0.3500 0.3500 0.3500
+
+newmtl Mt_Treeleaf_00
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Plant_TreeApple_A_Alb.png
+	map_Kd Plant_TreeApple_A_Alb.png
+	map_d Plant_TreeApple_A_Msk.png
+	norm Plant_TreeApple_A_Nrm.png
+
+newmtl Mt_Treeleaf_01
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Plant_TreeAppleLeaf_B_Alb.png
+	map_Kd Plant_TreeAppleLeaf_B_Alb.png
+	map_d Plant_TreeAppleLeaf_B_Msk.png
+	norm Plant_TreeAppleLeaf_B_Nrm.png
+
+newmtl Mt_Tree_Stump
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Wood_TreeApple_A_Alb.png
+	map_Kd Wood_TreeApple_A_Alb.png
+	norm Wood_TreeApple_A_Nrm.png
+
+newmtl Mt_Tree_Trunk
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Wood_TreeApple_A_Alb.png
+	map_Kd Wood_TreeApple_A_Alb.png
+	norm Wood_TreeApple_A_Nrm.png
+
+newmtl Mt_TreeSection_Stump
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Wood_AnnualRing_A_Alb.png
+	map_Kd Wood_AnnualRing_A_Alb.png
+	norm Wood_AnnualRing_A_Nrm.png
+
+newmtl Mt_TreeSection_Trunk
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Wood_AnnualRing_A_Alb.png
+	map_Kd Wood_AnnualRing_A_Alb.png
+	norm Wood_AnnualRing_A_Nrm.png

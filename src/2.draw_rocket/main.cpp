@@ -153,10 +153,10 @@ int main() {
     }
 
     // build and compile our shader program
-    Shader shader1("D:\\documents\\OpenGL\\src\\draw_rocket\\shader_v.vs",
-                   "D:\\documents\\OpenGL\\src\\draw_rocket\\shader_f.fs");
-    Shader shader2("D:\\documents\\OpenGL\\src\\draw_rocket\\shader_v_color.vs",
-                   "D:\\documents\\OpenGL\\src\\draw_rocket\\shader_f.fs");
+    Shader shader1("src/2.draw_rocket/shader_v.vs",
+                   "src/2.draw_rocket/shader_f.fs");
+    Shader shader2("src/2.draw_rocket/shader_v_color.vs",
+                   "src/2.draw_rocket/shader_f.fs");
 
     // triangle
     std::vector<float> triangle_vertices = {

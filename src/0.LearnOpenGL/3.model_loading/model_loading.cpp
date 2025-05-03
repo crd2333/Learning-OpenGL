@@ -66,11 +66,11 @@ int main() {
 
     // build and compile shaders
     Shader ourShader(
-        "D:\\documents\\OpenGL\\src\\0.LearnOpenGL\\3.model_loading\\model_loading.vs",
-        "D:\\documents\\OpenGL\\src\\0.LearnOpenGL\\3.model_loading\\model_loading.fs");
+        "src/0.LearnOpenGL/3.model_loading/model_loading.vs",
+        "src/0.LearnOpenGL/3.model_loading/model_loading.fs");
 
     // load models
-    Model ourModel("D:\\documents\\OpenGL\\resources\\objects\\sword\\Untitled.obj");
+    Model ourModel("resources/objects/cyborg/cyborg.obj");
 
     // draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

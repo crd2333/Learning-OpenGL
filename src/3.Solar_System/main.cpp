@@ -99,14 +99,14 @@ int main() {
     }
     glEnable(GL_DEPTH_TEST);  // configure global opengl state
 
-    Shader shader("D:\\documents\\OpenGL\\src\\Solar_System\\resources\\shader_v.vs",
-                  "D:\\documents\\OpenGL\\src\\Solar_System\\resources\\shader_f.fs");
+    Shader shader("src/3.Solar_System/resources/shader_v.vs",
+                  "src/3.Solar_System/resources/shader_f.fs");
 
     // define the textures
-    Texture sunText("D:\\documents\\OpenGL\\src\\Solar_System\\resources\\textures\\sun.jpg");
-    Texture earthText("D:\\documents\\OpenGL\\src\\Solar_System\\resources\\textures\\earth.jpg");
-    Texture marsText("D:\\documents\\OpenGL\\src\\Solar_System\\resources\\textures\\mars.jpg");
-    Texture moonText("D:\\documents\\OpenGL\\src\\Solar_System\\resources\\textures\\moon.jpg");
+    Texture sunText("src/3.Solar_System/resources/textures/sun.jpg");
+    Texture earthText("src/3.Solar_System/resources/textures/earth.jpg");
+    Texture marsText("src/3.Solar_System/resources/textures/mars.jpg");
+    Texture moonText("src/3.Solar_System/resources/textures/moon.jpg");
 
     // define a base sphere for all stars/planets/satellites
     Sphere sphere(baseRadius, Latitude_resolution, Longitude_resolution);

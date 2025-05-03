@@ -1,0 +1,5 @@
+{
+    "cmake.sourceDirectory": "D:/documents/OpenGL/include/glm",
+    "C_Cpp.errorSquiggles": "enabled",
+    "cmake.ignoreCMakeListsMissing": true
+}

@@ -43,8 +43,8 @@ int main() {
     }
 
     // build and compile our shader program
-    Shader ourShader("D:\\documents\\OpenGL\\src\\draw_flag\\flag.vs",
-                     "D:\\documents\\OpenGL\\src\\draw_flag\\flag.fs");
+    Shader ourShader("src/1.draw_flag/flag.vs",
+                     "src/1.draw_flag/flag.fs");
 
     /*
     the two shaders are below:
