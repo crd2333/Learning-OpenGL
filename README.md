@@ -3,7 +3,7 @@
 个人学习 Computer Graphics 及 OpenGL 过程中的代码记录，包括：
 1. GAMES101 课程作业，在 other 文件夹下
 2. [LearnOpenGL-zh](https://learnopengl-cn.github.io/) 教程的代码环境配置与代码注解（优化文件组织、删去重复注释、添加个人注释）
-3. ZJU 24fall《计算机图形学》（by 吴鸿智）课程作业，包括
+3. ZJU 24fall《计算机图形学》（by 吴鸿智）课程作业
 
 ### GAMES101 课程作业
 <div style="gap:10px">
